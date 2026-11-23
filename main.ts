@@ -6,51 +6,53 @@
 
 // ============================================================
 // 5x7 Bitmap Font (uppercase A-Z, 0-9, punctuation, space)
-// Each char: 5 wide x 7 high, 1-bit per pixel (MSB first)
+// Each char: 5 wide x 7 high, 1-bit per pixel (MSB first, bits 4-0)
+// Renderer uses mask 0x10 >>> gx (bits 4,3,2,1,0)
 // ============================================================
 const FONT_5x7: Record<string, number[]> = {
-  'A': [0x1E, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x33],
-  'B': [0x1F, 0x33, 0x33, 0x1F, 0x33, 0x33, 0x1F],
-  'C': [0x1E, 0x33, 0x20, 0x20, 0x20, 0x33, 0x1E],
-  'D': [0x1F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x1F],
-  'E': [0x3F, 0x20, 0x20, 0x1F, 0x20, 0x20, 0x3F],
-  'F': [0x3F, 0x20, 0x20, 0x1F, 0x20, 0x20, 0x20],
-  'G': [0x1E, 0x33, 0x20, 0x27, 0x23, 0x33, 0x1E],
-  'H': [0x33, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x33],
-  'I': [0x3E, 0x08, 0x08, 0x08, 0x08, 0x08, 0x3E],
-  'J': [0x1C, 0x0C, 0x0C, 0x0C, 0x0C, 0x3C, 0x18],
-  'K': [0x33, 0x36, 0x3C, 0x38, 0x3C, 0x36, 0x33],
-  'L': [0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x3F],
-  'M': [0x63, 0x77, 0x7F, 0x6B, 0x63, 0x63, 0x63],
-  'N': [0x33, 0x33, 0x39, 0x3D, 0x33, 0x33, 0x33],
-  'O': [0x1E, 0x33, 0x33, 0x33, 0x33, 0x33, 0x1E],
-  'P': [0x1F, 0x33, 0x33, 0x1F, 0x20, 0x20, 0x20],
-  'Q': [0x1E, 0x33, 0x33, 0x33, 0x3B, 0x36, 0x1E],
-  'R': [0x1F, 0x33, 0x33, 0x1F, 0x3C, 0x36, 0x33],
-  'S': [0x1E, 0x33, 0x20, 0x1E, 0x03, 0x33, 0x1E],
-  'T': [0x3F, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08],
-  'U': [0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x1E],
-  'V': [0x63, 0x63, 0x63, 0x63, 0x63, 0x36, 0x1C],
-  'W': [0x63, 0x63, 0x63, 0x6B, 0x7F, 0x77, 0x63],
-  'X': [0x63, 0x63, 0x36, 0x1C, 0x36, 0x63, 0x63],
-  'Y': [0x63, 0x63, 0x63, 0x36, 0x1C, 0x1C, 0x1C],
-  'Z': [0x3F, 0x03, 0x06, 0x0C, 0x18, 0x30, 0x3F],
-  '0': [0x1E, 0x33, 0x37, 0x3B, 0x3D, 0x33, 0x1E],
-  '1': [0x0C, 0x1C, 0x0C, 0x0C, 0x0C, 0x0C, 0x3E],
-  '2': [0x1E, 0x33, 0x03, 0x06, 0x0C, 0x18, 0x3F],
-  '3': [0x1E, 0x33, 0x03, 0x0E, 0x03, 0x33, 0x1E],
-  '4': [0x06, 0x0E, 0x1E, 0x36, 0x3F, 0x06, 0x06],
-  '5': [0x3F, 0x30, 0x30, 0x1E, 0x03, 0x33, 0x1E],
-  '6': [0x0E, 0x18, 0x30, 0x3E, 0x33, 0x33, 0x1E],
-  '7': [0x3F, 0x03, 0x06, 0x0C, 0x18, 0x18, 0x18],
-  '8': [0x1E, 0x33, 0x33, 0x1E, 0x33, 0x33, 0x1E],
-  '9': [0x1E, 0x33, 0x33, 0x1F, 0x03, 0x06, 0x0C],
-  ':': [0x00, 0x18, 0x18, 0x00, 0x00, 0x18, 0x18],
-  '-': [0x00, 0x00, 0x00, 0x1C, 0x00, 0x00, 0x00],
-  ',': [0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x10],
-  '.': [0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18],
-  '\'': [0x00, 0x18, 0x18, 0x00, 0x00, 0x00, 0x00],
+  '0': [0x0f, 0x11, 0x11, 0x15, 0x11, 0x11, 0x0f],
+  '1': [0x04, 0x0c, 0x04, 0x04, 0x04, 0x04, 0x0e],
+  '2': [0x0f, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1f],
+  '3': [0x0f, 0x11, 0x01, 0x0f, 0x01, 0x11, 0x0f],
+  '4': [0x02, 0x06, 0x0e, 0x12, 0x1f, 0x02, 0x02],
+  '5': [0x1f, 0x10, 0x10, 0x0f, 0x01, 0x11, 0x0f],
+  '6': [0x0f, 0x10, 0x10, 0x1f, 0x11, 0x11, 0x0f],
+  '7': [0x1f, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08],
+  '8': [0x0f, 0x11, 0x11, 0x0f, 0x11, 0x11, 0x0f],
+  '9': [0x0f, 0x11, 0x11, 0x0f, 0x01, 0x02, 0x0c],
+  'A': [0x0f, 0x11, 0x11, 0x1f, 0x11, 0x11, 0x11],
+  'B': [0x1f, 0x11, 0x11, 0x1f, 0x11, 0x11, 0x1f],
+  'C': [0x0f, 0x11, 0x10, 0x10, 0x10, 0x11, 0x0f],
+  'D': [0x1f, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1f],
+  'E': [0x1f, 0x10, 0x10, 0x1f, 0x10, 0x10, 0x1f],
+  'F': [0x1f, 0x10, 0x10, 0x1f, 0x10, 0x10, 0x10],
+  'G': [0x0f, 0x11, 0x10, 0x13, 0x11, 0x11, 0x0f],
+  'H': [0x11, 0x11, 0x11, 0x1f, 0x11, 0x11, 0x11],
+  'I': [0x1f, 0x04, 0x04, 0x04, 0x04, 0x04, 0x1f],
+  'J': [0x0e, 0x04, 0x04, 0x04, 0x04, 0x1c, 0x08],
+  'K': [0x11, 0x12, 0x14, 0x18, 0x14, 0x12, 0x11],
+  'L': [0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1f],
+  'M': [0x11, 0x1b, 0x1f, 0x15, 0x11, 0x11, 0x11],
+  'N': [0x11, 0x11, 0x13, 0x15, 0x11, 0x11, 0x11],
+  'O': [0x0f, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0f],
+  'P': [0x1f, 0x11, 0x11, 0x1f, 0x10, 0x10, 0x10],
+  'Q': [0x0f, 0x11, 0x11, 0x11, 0x15, 0x12, 0x0f],
+  'R': [0x1f, 0x11, 0x11, 0x1f, 0x14, 0x12, 0x11],
+  'S': [0x0f, 0x11, 0x10, 0x0f, 0x01, 0x11, 0x0f],
+  'T': [0x1f, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04],
+  'U': [0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0f],
+  'V': [0x11, 0x11, 0x11, 0x11, 0x11, 0x0a, 0x04],
+  'W': [0x11, 0x11, 0x11, 0x15, 0x1f, 0x1b, 0x11],
+  'X': [0x11, 0x11, 0x0a, 0x04, 0x0a, 0x11, 0x11],
+  'Y': [0x11, 0x11, 0x11, 0x0a, 0x04, 0x04, 0x04],
+  'Z': [0x1f, 0x01, 0x02, 0x04, 0x08, 0x10, 0x1f],
+  ':': [0x00, 0x04, 0x04, 0x00, 0x00, 0x04, 0x04],
+  '-': [0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00],
+  ',': [0x00, 0x00, 0x00, 0x00, 0x04, 0x04, 0x02],
+  '.': [0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x04],
+  '\'': [0x00, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00],
   ' ': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+  ';': [0x00, 0x04, 0x04, 0x00, 0x00, 0x04, 0x02],
 };
 
 // ============================================================
@@ -89,11 +91,11 @@ function createPNG(img: Uint8Array): Uint8Array {
   const cs: Uint8Array[] = [];
   const ihdr = new Uint8Array(13); u32(ihdr, 0, W); u32(ihdr, 4, H); ihdr[8]=8; ihdr[9]=2; ihdr[10]=0; ihdr[11]=0; ihdr[12]=0;
   chunk(cs, 'IHDR', ihdr);
-  const { deflateRawSync } = require('node:zlib');
+  const { deflateSync } = require('node:zlib');
   const raw = new Uint8Array(H * (W * 3 + 1));
   let p = 0;
   for (let y = 0; y < H; y++) { raw[p++] = 0; raw.set(img.subarray(y*W*3, y*W*3+W*3), p); p += W*3; }
-  chunk(cs, 'IDAT', deflateRawSync(raw));
+  chunk(cs, 'IDAT', deflateSync(raw));  // FIX: use deflateSync (zlib stream) not deflateRawSync
   chunk(cs, 'IEND', new Uint8Array(0));
   const sig = new Uint8Array([0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A]);
   const png = new Uint8Array(8 + cs.reduce((s,c)=>s+c.length,0));
@@ -109,26 +111,36 @@ class Canvas {
   constructor() { this.d = new Uint8Array(W * H * 3); }
   px(x: number, y: number, r: number, g: number, b: number): void {
     if (x < 0 || x >= W || y < 0 || y >= H) return;
-    const i = (y * W + x) * 3; this.d[i] = r; this.d[i+1] = g; this.d[i+2] = b;
+    const i = (y * W + x) * 3;
+    this.d[i] = r; this.d[i+1] = g; this.d[i+2] = b;
   }
-  get(x: number, y: number): [number,number,number] {
+  get(x: number, y: number): number[] {
     if (x < 0 || x >= W || y < 0 || y >= H) return [0,0,0];
-    const i = (y * W + x) * 3; return [this.d[i], this.d[i+1], this.d[i+2]];
+    const i = (y * W + x) * 3;
+    return [this.d[i], this.d[i+1], this.d[i+2]];
   }
   rect(x: number, y: number, w: number, h: number, c: number[]): void {
-    for (let yy = y; yy < y+h; yy++) for (let xx = x; xx < x+w; xx++) this.px(xx, yy, c[0], c[1], c[2]);
+    for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) this.px(xx, yy, c[0], c[1], c[2]);
   }
   frame(x: number, y: number, w: number, h: number, c: number[]): void {
-    for (let xx = x; xx < x+w; xx++) { this.px(xx, y, ...c); this.px(xx, y+h-1, ...c); }
-    for (let yy = y; yy < y+h; yy++) { this.px(x, yy, ...c); this.px(x+w-1, yy, ...c); }
+    this.rect(x, y, w, 1, c); this.rect(x, y+h-1, w, 1, c);
+    this.rect(x, y, 1, h, c); this.rect(x+w-1, y, 1, h, c);
   }
-  line(x0: number, y0: number, x1: number, y1: number, c: number[]): void {
-    let dx = Math.abs(x1-x0), dy = Math.abs(y1-y0), sx = x0<x1?1:-1, sy = y0<y1?1:-1, err = dx-dy, x=x0, y=y0;
-    while (true) { this.px(x, y, ...c); if (x===x1&&y===y1) break; const e2=2*err; if (e2>-dy){err-=dy;x+=sx;} if (e2<dx){err+=dx;y+=sy;} }
+  line(x1: number, y1: number, x2: number, y2: number, c: number[]): void {
+    const dx = Math.abs(x2-x1), dy = Math.abs(y2-y1);
+    const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
+    let err = (dx > dy ? dx : -dy) / 2;
+    while (true) { this.px(x1, y1, c[0], c[1], c[2]); if (x1===x2 && y1===y2) break; const e2 = err; if (e2 > -dx) { err -= dy; x1 += sx; } if (e2 < dy) { err += dx; y1 += sy; } }
   }
-  circle(cx: number, cy: number, r: number, c: number[], fill=false): void {
-    if (fill) { for (let y=-r; y<=r; y++) { const dx=Math.floor(Math.sqrt(r*r-y*y)); for (let x=-dx; x<=dx; x++) this.px(cx+x,cy+y,...c); } }
-    else { let x=r, y=0, e=0; while (x>=y) { this.px(cx+x,cy+y,...c); this.px(cx+y,cy+x,...c); this.px(cx-y,cy+x,...c); this.px(cx-x,cy+y,...c); this.px(cx-x,cy-y,...c); this.px(cx-y,cy-x,...c); this.px(cx+y,cy-x,...c); this.px(cx+x,cy-y,...c); y++; e+=2*y+1; if (2*(e-x)+1>0){x--;e+=1-2*x;} } }
+  circle(cx: number, cy: number, r: number, c: number[]): void {
+    let x = 0, y = r, d = 3 - 2*r;
+    while (y >= x) {
+      this.px(cx+x, cy+y, c[0], c[1], c[2]); this.px(cx+y, cy+x, c[0], c[1], c[2]);
+      this.px(cx-y, cy+x, c[0], c[1], c[2]); this.px(cx-x, cy+y, c[0], c[1], c[2]);
+      this.px(cx-x, cy-y, c[0], c[1], c[2]); this.px(cx-y, cy-x, c[0], c[1], c[2]);
+      this.px(cx+y, cy-x, c[0], c[1], c[2]); this.px(cx+x, cy-y, c[0], c[1], c[2]);
+      if (d > 0) { y--; d += 4*(x-y) + 10; } else { d += 4*x + 6; } x++;
+    }
   }
   text(s: string, x: number, y: number, c: number[], sc=1): void {
     let cx = x;
@@ -163,17 +175,16 @@ const C = {
 // Motifs (each draws at panel center cx, cy)
 // ============================================================
 function mFlame(c: Canvas, cx: number, cy: number): void {
-  for (let i = 0; i < 5; i++) c.rect(cx - 6 + i, cy - i*6, 12 - i*2, 6, C.flR);
-  for (let i = 0; i < 4; i++) c.rect(cx - 4 + i, cy - i*6 - 1, 8 - i*1.5, 4, C.flO);
-  c.rect(cx-2, cy-20, 4, 4, C.flY); c.rect(cx+8, cy-14, 3, 4, C.flO); c.rect(cx-11, cy-10, 3, 4, C.flO);
+  for (let i=0;i<6;i++) {
+    const h = 24 - i*4, w = 8 + i*2;
+    c.rect(cx-w/2, cy-h/2, w, h, i%2?C.flO:C.flR);
+  }
+  c.rect(cx-2, cy-12, 4, 8, C.flY);
 }
 function mGlobe(c: Canvas, cx: number, cy: number): void {
-  c.circle(cx, cy, 22, C.glBl); c.circle(cx, cy, 21, C.glBl);
-  for (let a = 0; a < Math.PI*2; a += Math.PI/6) {
-    const s = Math.round(a/(Math.PI/6))%12; if (![1,4,7].includes(s))
-      c.line(Math.round(cx+Math.cos(a)*25), Math.round(cy+Math.sin(a)*25),
-             Math.round(cx+Math.cos(a)*31), Math.round(cy+Math.sin(a)*31), C.co2);
-  }
+  c.circle(cx, cy, 22, C.glBl); c.circle(cx, cy, 18, C.bg);
+  c.line(cx-16, cy, cx+16, cy, C.glBl); c.line(cx, cy-16, cx, cy+16, C.glBl);
+  c.line(cx-11, cy-11, cx+11, cy+11, C.glBl); c.line(cx-11, cy+11, cx+11, cy-11, C.glBl);
   c.text("CO2", cx-9, cy+32, C.co2);
 }
 function mServer(c: Canvas, cx: number, cy: number): void {
@@ -228,18 +239,158 @@ function render(): Canvas {
 function find(h: Uint8Array, n: Uint8Array): number {
   for (let i=0;i<=h.length-n.length;i++){let m=true;for(let j=0;j<n.length;j++)if(h[i+j]!==n[j]){m=false;break;}if(m)return i;}return -1;
 }
+
+// Proper PNG chunk parser for verification
+function parsePNG(png: Uint8Array): Map<string, Uint8Array[]> {
+  const chunks = new Map<string, Uint8Array[]>();
+  if (png[0]!==0x89||png[1]!==0x50||png[2]!==0x4E||png[3]!==0x47||
+      png[4]!==0x0D||png[5]!==0x0A||png[6]!==0x1A||png[7]!==0x0A) {
+    throw new Error("Invalid PNG signature");
+  }
+  let pos = 8;
+  while (pos < png.length) {
+    if (pos + 8 > png.length) break;
+    const len = (png[pos]<<24)|(png[pos+1]<<16)|(png[pos+2]<<8)|png[pos+3];
+    const type = new TextDecoder().decode(png.slice(pos+4, pos+8));
+    if (pos + 8 + len + 4 > png.length) break;
+    const data = png.slice(pos+8, pos+8+len);
+    if (!chunks.has(type)) chunks.set(type, []);
+    chunks.get(type)!.push(data);
+    pos += 12 + len; // length(4) + type(4) + data(len) + crc(4)
+  }
+  return chunks;
+}
+
+// Font round-trip self-test
+function testFontRoundTrip(): void {
+  console.log("\n=== FONT ROUND-TRIP SELF-TEST ===");
+  
+  // Build reverse lookup
+  const REVERSE_FONT = new Map<string, string>();
+  for (const [ch, bits] of Object.entries(FONT_5x7)) {
+    const key = bits.join(',');
+    REVERSE_FONT.set(key, ch);
+  }
+  
+  const TEST_STRINGS = [
+    "WORLD NEWS",
+    "NOVEMBER 23, 2026",
+    "MIDDLE EAST",
+    "CLIMATE",
+    "TECH",
+    "AVIATION",
+    "IRAN ATTACKS; US BASES HIT",
+    "HOUTHIS STRIKE SAUDI OIL",
+    "COP31 COLLAPSES",
+    "NO FOSSIL FUEL ACCORD",
+    "MSFT: AI FLAWS RISK OUTAGES",
+    "TRUMP THREATENS DC TAX",
+    "DELTA GLITCH DELAYS FLIGHTS",
+    "AUTOMATION FAILURE",
+    "DELAY",
+  ];
+  
+  function renderString(str: string, scale: number = 1): number[][] {
+    const width = str.length * 6 * scale;
+    const height = 7 * scale;
+    const bmp: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
+    
+    let x = 0;
+    for (const ch of str) {
+      const bits = FONT_5x7[ch];
+      if (!bits) { x += 6 * scale; continue; }
+      for (let row = 0; row < 7; row++) {
+        const byte = bits[row];
+        for (let col = 0; col < 5; col++) {
+          if (byte & (0x10 >>> col)) {
+            for (let sy = 0; sy < scale; sy++) {
+              for (let sx = 0; sx < scale; sx++) {
+                bmp[row * scale + sy][x + col * scale + sx] = 1;
+              }
+            }
+          }
+        }
+      }
+      x += 6 * scale;
+    }
+    return bmp;
+  }
+  
+  function decodeBitmap(bmp: number[][], scale: number = 1): string {
+    const height = bmp.length;
+    const width = bmp[0].length;
+    let result = "";
+    let x = 0;
+    
+    while (x < width) {
+      const cell: number[] = [];
+      for (let row = 0; row < 7; row++) {
+        let byte = 0;
+        for (let col = 0; col < 5; col++) {
+          const sy = row * scale + Math.floor(scale/2);
+          const sx = x + col * scale + Math.floor(scale/2);
+          if (sy < height && sx < width && bmp[sy][sx]) {
+            byte |= (0x10 >>> col);
+          }
+        }
+        cell.push(byte);
+      }
+      const key = cell.join(',');
+      const ch = REVERSE_FONT.get(key) || '?';
+      result += ch;
+      x += 6 * scale;
+    }
+    return result;
+  }
+  
+  let allPassed = true;
+  for (const str of TEST_STRINGS) {
+    const rendered = renderString(str, 1);
+    const decoded = decodeBitmap(rendered, 1);
+    const passed = str === decoded;
+    console.log(`  ${passed ? '✓' : '✗'} "${str}" -> "${decoded}"`);
+    if (!passed) allPassed = false;
+  }
+  console.log(`  ${allPassed ? 'ALL PASSED' : 'SOME FAILED'}`);
+  if (!allPassed) throw new Error("Font round-trip test failed");
+}
+
 function verify(png: Uint8Array, cv: Canvas): void {
   console.log("=== VERIFICATION ===");
   console.log(`PNG bytes: ${png.length}`); assert(png.length > 1000, "PNG size");
-  const ihdr = find(png, new TextEncoder().encode('IHDR'));
-  console.log(`IHDR at ${ihdr}`); assert(ihdr > 0, "IHDR");
-  const w = (png[ihdr+4]<<24)|(png[ihdr+5]<<16)|(png[ihdr+6]<<8)|png[ihdr+7];
-  const h = (png[ihdr+8]<<24)|(png[ihdr+9]<<16)|(png[ihdr+10]<<8)|png[ihdr+11];
+  
+  // Parse PNG properly
+  const chunks = parsePNG(png);
+  
+  const ihdrData = chunks.get('IHDR')?.[0];
+  assert(ihdrData && ihdrData.length === 13, "IHDR");
+  const w = (ihdrData[0]<<24)|(ihdrData[1]<<16)|(ihdrData[2]<<8)|ihdrData[3];
+  const h = (ihdrData[4]<<24)|(ihdrData[5]<<16)|(ihdrData[6]<<8)|ihdrData[7];
   console.log(`${w}x${h}`); assert(w===512&&h===512, "512x512");
   
-  const g1 = cv.get(200,10), g2 = cv.get(250,10);
-  const gold = (g1[0]>200&&g1[1]>180&&g1[2]<100) || (g2[0]>200&&g2[1]>180&&g2[2]<100);
-  console.log(`Masthead gold: ${gold} (${g1.join(',')})/(${g2.join(',')})`); assert(gold, "gold text");
+  // Verify PNG is decodable by zlib (IDAT chunk)
+  const idatChunks = chunks.get('IDAT');
+  assert(idatChunks && idatChunks.length > 0, "IDAT");
+  const { inflateSync } = require('node:zlib');
+  try {
+    inflateSync(idatChunks[0]);
+    console.log("IDAT: zlib decode OK");
+  } catch (e) {
+    console.error("IDAT: zlib decode FAILED", e);
+    throw new Error("IDAT zlib decode failed");
+  }
+  
+  // Verify masthead gold text - "WORLD NEWS" at scale 2 starts at x=196, y=8, height=14
+  // Check at y=8 (top row of text) which has solid gold pixels
+  let goldCount = 0;
+  for (let y = 8; y < 22; y++) {
+    for (let x = 196; x < 316; x++) {
+      const p = cv.get(x, y);
+      if (p[0]>200 && p[1]>180 && p[2]<100) goldCount++;
+    }
+  }
+  console.log(`Masthead gold pixels: ${goldCount}`);
+  assert(goldCount > 100, "gold text");
   
   for (const [x,y,d] of [[M,SY,"TL"],[P2X,SY,"TR"],[M,SY+PH-1,"BL"],[P2X,SY+PH-1,"BR"]]) {
     const p=cv.get(x,y); const b=p[0]>60&&p[0]<80&&p[1]>70&&p[1]<90&&p[2]>80&&p[2]<100;
@@ -256,11 +407,21 @@ function verify(png: Uint8Array, cv: Canvas): void {
     console.log(`Label ${r.n}: ${bc}px`); assert(bc>50, `label ${r.n}`);
   }
   
-  const pG=cv.get(250,10), pD=cv.get(0,0), pP=cv.get(100,100);
-  const diff=Math.abs(pG[0]-pD[0])+Math.abs(pG[1]-pD[1])+Math.abs(pG[2]-pD[2])+
-             Math.abs(pG[0]-pP[0])+Math.abs(pG[1]-pP[1])+Math.abs(pG[2]-pP[2])+
-             Math.abs(pD[0]-pP[0])+Math.abs(pD[1]-pP[1])+Math.abs(pD[2]-pP[2]);
-  console.log(`Color diff: ${diff}`); assert(diff>100, "non-uniform");
+  // Check distinct colors: bg, masthead bg, panel, text
+  const pBg = cv.get(0,0);           // dark blue bg
+  const pMhBg = cv.get(10,10);       // dark red masthead bg
+  const pPanel = cv.get(50, 100);    // panel bg
+  const pLabel = cv.get(30, SY+10);  // gold label
+  
+  const diff = 
+    Math.abs(pBg[0]-pMhBg[0])+Math.abs(pBg[1]-pMhBg[1])+Math.abs(pBg[2]-pMhBg[2])+
+    Math.abs(pBg[0]-pPanel[0])+Math.abs(pBg[1]-pPanel[1])+Math.abs(pBg[2]-pPanel[2])+
+    Math.abs(pBg[0]-pLabel[0])+Math.abs(pBg[1]-pLabel[1])+Math.abs(pBg[2]-pLabel[2])+
+    Math.abs(pMhBg[0]-pPanel[0])+Math.abs(pMhBg[1]-pPanel[1])+Math.abs(pMhBg[2]-pPanel[2])+
+    Math.abs(pMhBg[0]-pLabel[0])+Math.abs(pMhBg[1]-pLabel[1])+Math.abs(pMhBg[2]-pLabel[2])+
+    Math.abs(pPanel[0]-pLabel[0])+Math.abs(pPanel[1]-pLabel[1])+Math.abs(pPanel[2]-pLabel[2]);
+  console.log(`Color diff: ${diff} (bg:${pBg.join(',')} mhBg:${pMhBg.join(',')} panel:${pPanel.join(',')} label:${pLabel.join(',')})`);
+  assert(diff>100, "non-uniform");
   assert(cv.d.length===W*H*3, "canvas size");
   console.log("=== ALL ASSERTIONS PASSED ===");
 }
@@ -271,8 +432,9 @@ function assert(c: boolean, m: string): void { if(!c){console.error(`ASSERTION F
 // ============================================================
 const cv = render();
 const png = createPNG(cv.d);
+testFontRoundTrip();
+verify(png,cv);
 const {writeFileSync,mkdirSync}=require('node:fs'),{join}=require('node:path');
 const out=process.env.MAKEFUN_OUTPUT_DIR??'/output'; mkdirSync(out,{recursive:true});
 writeFileSync(join(out,'entry.png'),png);
-verify(png,cv);
 console.log(`Written to ${join(out,'entry.png')}`);
